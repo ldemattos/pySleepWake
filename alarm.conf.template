@@ -1,0 +1,12 @@
+[main]
+# server ip address
+ip: X.X.X.X 
+
+# server hardware address
+mac: XX:XX:XX:XX:XX:XX
+
+# local interface that will send the magic packets
+iface: eth0
+
+# number of magic packets to send
+npackets = 3

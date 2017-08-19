@@ -22,12 +22,13 @@ from ConfigParser import SafeConfigParser
 import shlex
 import subprocess
 
+
 def main(args):
 
     # Read server conf file
     print "Reading conf file...",
     parser = SafeConfigParser()
-    parser.read('pySleepWake.conf')
+    parser.read(sys.argv[1])
     ip = parser.get('main', 'ip')
     mac = parser.get('main', 'mac')
     iface = parser.get('main', 'iface')
