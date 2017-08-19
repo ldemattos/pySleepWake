@@ -22,7 +22,6 @@ from ConfigParser import SafeConfigParser
 import shlex
 import subprocess
 
-
 def main(args):
 
     # Read server conf file
