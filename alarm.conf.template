@@ -1,6 +1,6 @@
 [main]
 # server ip address
-ip: X.X.X.X 
+ip: X.X.X.X
 
 # server hardware address
 mac: XX:XX:XX:XX:XX:XX
@@ -10,3 +10,8 @@ iface: eth0
 
 # number of magic packets to send
 npackets = 3
+
+# time delay after the last sucessfully ping
+# in order to let the first arp packages after shudown turn
+# in minutes
+pdel: 3
