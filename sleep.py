@@ -18,20 +18,27 @@
 #     You should have received a copy of the GNU Affero General Public License
 #     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import argparse
 from ConfigParser import SafeConfigParser
 import shlex
 import subprocess
 import time
+import logging
 
 def main(args):
+	
+	# Input arguments
+    parser = argparse.ArgumentParser(description='pySleeWake sleeper',prog='sleep.py')
+    parser.add_argument("conf",help="configuration file")    
+    args,unknown = parser.parse_known_args()
 
     # Read server conf file
     print "Reading conf file...",
     parser = SafeConfigParser()
-    parser.read(sys.argv[1])
+    parser.read(args.conf)
     TxRx_rate = float(parser.get('sleep', 'TxRx_rate'))
-    tWin = float(parser.get('sleep', 'twin'))
-    tdel = float(parser.get('sleep', 'tdel'))
+    tWin = float(parser.get('sleep', 'twin'))*60.0
+    tdel = float(parser.get('sleep', 'tdel'))*60.0
     iface = parser.get('sleep', 'iface')
     print "OK"
 
@@ -64,12 +71,12 @@ def main(args):
             # read received bytes
             rx = subprocess.Popen(args_rx, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
             rx_val = int(rx.stdout.readline().strip())
-            rx_win[i] = (rx_val-rx_ref)/1000.0/(tdel*60.0)
+            rx_win[i] = (rx_val-rx_ref)/1000.0/(tdel)
 
             # read transceived bytes
             tx = subprocess.Popen(args_tx, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
             tx_val = int(tx.stdout.readline().strip())
-            tx_win[i] = (tx_val-tx_ref)/1000.0/(tdel*60.0)
+            tx_win[i] = (tx_val-tx_ref)/1000.0/(tdel)
 
             print "rx: ",
             print rx_win
@@ -110,7 +117,7 @@ def main(args):
                 subprocess.call(cmd_suspend,shell=True)
 
         # Delay the next measureament
-        time.sleep(60.*tdel)
+        time.sleep(tdel)
 
     return(0)
 
