@@ -45,10 +45,8 @@ def main(args):
 	print "OK"
 	
 	# commands
-	cmd_tcp = 'tcpdump -i '+iface+' arp -c '+'1'+' -p'+' host '+ip
-	args_tcp = shlex.split(cmd_tcp)
-	cmd_ping = 'ping '+ip+' -c1'
-	args_ping = shlex.split(cmd_ping)
+	args_tcp = shlex.split('tcpdump -i '+iface+' arp -c '+'1'+' -p'+' host '+ip)
+	cmd_ping = "ping -c1 -w2 " + ip + " > /dev/null 2>&1"
 	cmd_wake = 'etherwake -i '+iface+' '+mac
 	
 	# Wait for someone calls the server in the network
@@ -62,7 +60,7 @@ def main(args):
 				print "Someone is looking for the server..."
 	
 				# check if the server is online already
-				if system("ping -c1 -w2 " + ip + " > /dev/null 2>&1") != 0:
+				if system(cmd_ping) != 0:
 					print "It is not online..."
 	
 					# send magic packages if there is enough time delay

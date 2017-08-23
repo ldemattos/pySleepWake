@@ -48,10 +48,8 @@ def main(args):
     tx_win = [TxRx_rate*winlen for i in xrange(winlen)]
 
     # commands
-    cmd_rx = 'cat /sys/class/net/'+iface+'/statistics/rx_bytes'
-    args_rx = shlex.split(cmd_rx)
-    cmd_tx = 'cat /sys/class/net/'+iface+'/statistics/tx_bytes'
-    args_tx = shlex.split(cmd_tx)
+    args_rx = shlex.split('cat /sys/class/net/'+iface+'/statistics/rx_bytes')
+    args_tx = shlex.split('cat /sys/class/net/'+iface+'/statistics/tx_bytes')
     cmd_suspend = 'systemctl suspend'
 
     first_loop = 1
