@@ -28,7 +28,7 @@ import logging
 def main(args):
 	
 	# Input arguments
-    parser = argparse.ArgumentParser(description='pySleeWake sleeper',prog='sleep.py')
+    parser = argparse.ArgumentParser(description='pySleepWake sleeper',prog='sleep.py')
     parser.add_argument("conf",help="configuration file")    
     args,unknown = parser.parse_known_args()
 

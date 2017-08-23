@@ -29,7 +29,7 @@ from os import system
 def main(args):
 	
 	# Input arguments
-	parser = argparse.ArgumentParser(description='pySleeWake alarm',prog='alarm.py')
+	parser = argparse.ArgumentParser(description='pySleepWake alarm',prog='alarm.py')
 	parser.add_argument("conf",help="configuration file")   
 	args,unknown = parser.parse_known_args()
 
