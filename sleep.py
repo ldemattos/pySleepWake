@@ -113,9 +113,9 @@ def main(args):
 	
 			# Update counter
 			if i < winlen:
-				i=0
-			else:
 				i+=1
+			else:
+				i=0
 	
 			# Check avegerages
 			if rx_avg < TxRx_rate and tx_avg < TxRx_rate:
