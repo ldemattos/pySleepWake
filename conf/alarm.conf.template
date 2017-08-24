@@ -14,4 +14,8 @@ npackets = 3
 # time delay after the last sucessfully ping
 # in order to let the first arp packages after shudown turn
 # in minutes
-pdel: 3
+pdel: 5
+
+# Log level
+# info (20) or debug (10)
+log_level: 10

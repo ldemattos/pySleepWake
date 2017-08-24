@@ -3,10 +3,14 @@
 TxRx_rate: 50.0
 
 # Window time in minutes
-twin: 30.0
+twin: 1.0
 
 # Time delay between measurements, in minutes
-tdel: 1.0
+tdel: 0.1
 
 # Reference interface
 iface: wlp3s0
+
+# Log level
+# info (20) or debug (10)
+log_level: 10

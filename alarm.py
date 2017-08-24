@@ -25,6 +25,9 @@ import subprocess
 import timeit
 import time
 from os import system
+import sys
+sys.path.insert(0, './src')
+import log
 
 def main(args):
 	
@@ -32,17 +35,24 @@ def main(args):
 	parser = argparse.ArgumentParser(description='pySleepWake alarm',prog='alarm.py')
 	parser.add_argument("conf",help="configuration file")   
 	args,unknown = parser.parse_known_args()
+	
+	# Read conf file
+	parser = SafeConfigParser()
+	parser.read(args.conf)	
+	
+	# Setup log
+	logger = log.setup('log/alarm.log',int(parser.get('main','log_level')))
 
 	# Read alarm conf file
 	print "Reading conf file...",
-	parser = SafeConfigParser()
-	parser.read(args.conf)
+	logger.info("Reading conf file...")
 	ip = parser.get('main', 'ip')
 	mac = parser.get('main', 'mac')
 	iface = parser.get('main', 'iface')
 	npackets = int(parser.get('main', 'npackets'))
 	pdel = float(parser.get('main', 'pdel'))*60.0
 	print "OK"
+	logger.info("...OK")
 	
 	# commands
 	args_tcp = shlex.split('tcpdump -i '+iface+' arp -c '+'1'+' -p'+' host '+ip)
@@ -56,27 +66,33 @@ def main(args):
 		for row in iter(tcpdump.stdout.readline, b''):
 			print row
 			print row.find('packet')
-			if row.find("1 packet captured") != -1:
+			if row.find("1 packet captured") != -1:				
 				print "Someone is looking for the server..."
+				logger.debug("Someone is looking for the server...")
 	
 				# check if the server is online already
 				if system(cmd_ping) != 0:
 					print "It is not online..."
+					logger.debug("It is not online...")
 	
 					# send magic packages if there is enough time delay
 					# from last communication
 					if timeit.default_timer() - pdel0 > 0.:
 						for i in xrange(npackets):
-							print "WAKE!"
+							print "Waking up the server..."
+							logger.info("Waking up the server...")
 							subprocess.call(cmd_wake,shell=True)
+							
 					else:
 						delay = pdel0 - timeit.default_timer()
 						print "Not enough time to wake it up :/ Waiting for %f s ..."%(delay)
+						logger.debug("Not enough time to wake it up :/ Waiting for %f s ..."%(delay))
 						time.sleep(delay)
 	
 				else:
 					pdel0 = timeit.default_timer() + pdel
 					print "It is online... take it easy!"
+					logger.debug("It is online... take it easy!")
 	
 	return(0)
 

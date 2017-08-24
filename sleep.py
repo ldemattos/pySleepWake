@@ -18,12 +18,12 @@
 #     You should have received a copy of the GNU Affero General Public License
 #     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import sys
 import argparse
 from ConfigParser import SafeConfigParser
 import shlex
 import subprocess
 import time
+import sys
 sys.path.insert(0, './src')
 import log
 
@@ -84,8 +84,7 @@ def main(args):
 			tx = subprocess.Popen(args_tx, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 			tx_val = int(tx.stdout.readline().strip())
 			tx_win[i] = (tx_val-tx_ref)/1000.0/(tdel)
-	
-					
+						
 			print "rx: ",
 			print rx_win
 			print "tx: ",
@@ -125,7 +124,7 @@ def main(args):
 				rx_win = [TxRx_rate*winlen for i in xrange(winlen)]
 				tx_win = [TxRx_rate*winlen for i in xrange(winlen)]
 				logger.info("Going to sleep!")
-				#~ subprocess.call(cmd_suspend,shell=True)
+				subprocess.call(cmd_suspend,shell=True)
 	
 		# Delay the next measureament
 		time.sleep(tdel)

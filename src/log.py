@@ -27,7 +27,7 @@ def setup(filename,log_level):
 	logger.setLevel(log_level)
 	
 	# create a file handler
-	handler = logging.FileHandler('log/sleep.log')
+	handler = logging.FileHandler(filename)
 	handler.setLevel(log_level)
 	
 	# create a logging format
