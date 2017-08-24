@@ -112,7 +112,7 @@ def main(args):
 			tx_ref = tx_val
 	
 			# Update counter
-			if i == winlen:
+			if i < winlen:
 				i=0
 			else:
 				i+=1
