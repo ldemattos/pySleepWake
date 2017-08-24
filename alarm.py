@@ -64,11 +64,18 @@ def main(args):
 	while True:
 		tcpdump = subprocess.Popen(args_tcp, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 		for row in iter(tcpdump.stdout.readline, b''):
+			
 			print row
+			
+			# acquire the poker
+			if row.find("who-has") != -1:
+				poker = row.split()[6]
+				print poker			
+			
 			print row.find('packet')
 			if row.find("1 packet captured") != -1:				
 				print "Someone is looking for the server..."
-				logger.debug("Someone is looking for the server...")
+				logger.debug("%s is looking for the server..."%(poker[0:-1]))
 	
 				# check if the server is online already
 				if system(cmd_ping) != 0:
