@@ -20,8 +20,14 @@ pdel: 5
 # keeps constantly trying to check on server
 blacklist: router.domain.com
 
+[log]
 # Log level
 # info (20) or debug (10)
 log_level: 20
+
+# Log file
+log_file: /var/log/pySleepWake_sleep.log
+
+
 
 

@@ -39,7 +39,7 @@ def main(args):
 	parser.read(args.conf)
 	
 	# Setup log
-	logger = log.setup('log/sleep.log',int(parser.get('sleep','log_level')))
+	logger = log.setup(parser.get('log','log_file'),int(parser.get('log','log_level')))
 
     # Initializing some startup variables
 	print "Reading conf file...",
@@ -110,14 +110,15 @@ def main(args):
 			i=0
 
 		# Check avegerages
-		if rx_avg < TxRx_rate and tx_avg < TxRx_rate:
+		if rx_avg < TxRx_rate and tx_avg < TxRx_rate:			
+			
+			# Reset variables before suspending			
+			i = 0
+			rx_ref, tx_ref, rx_win, tx_win = set_refs(args_rx,args_tx,TxRx_rate,winlen)		
 			
 			logger.info("Going to sleep!")
 			subprocess.call(cmd_suspend,shell=True)
-			
-			# Reset variables before suspending
-			i = 0
-			rx_ref, tx_ref, rx_win, tx_win = set_refs(args_rx,args_tx,TxRx_rate,winlen)		
+			time.sleep(3.0)
 	
 	return(0)
 

@@ -41,7 +41,7 @@ def main(args):
 	parser.read(args.conf)	
 	
 	# Setup log
-	logger = log.setup('log/alarm.log',int(parser.get('main','log_level')))
+	logger = log.setup(parser.get('log','log_file'),int(parser.get('log','log_level')))
 
 	# Read alarm conf file
 	print "Reading conf file...",
@@ -91,8 +91,8 @@ def main(args):
 						# from last communication
 						if timeit.default_timer() - pdel0 > 0.:
 							for i in xrange(npackets):
-								print "Waking up the server..."
-								logger.info("Waking up the server...")
+								print "Waking up the server... Requested by %s"%(poker)
+								logger.info("Waking up the server... Requested by %s"%(poker))
 								subprocess.call(cmd_wake,shell=True)
 								
 						else:

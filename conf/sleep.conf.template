@@ -1,16 +1,20 @@
 [sleep]
 # Tx and Rx average in KB/s
-TxRx_rate: 50.0
+TxRx_rate: 0.20
 
 # Window time in minutes
-twin: 1.0
+twin: 20.0
 
 # Time delay between measurements, in minutes
-tdel: 0.1
+tdel: 1.0
 
 # Reference interface
 iface: wlp3s0
 
+[log]
 # Log level
 # info (20) or debug (10)
 log_level: 20
+
+# Log file
+log_file: /var/log/pySleepWake_sleep.log
