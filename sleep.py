@@ -42,13 +42,11 @@ def main(args):
 	logger = log.setup(parser.get('log','log_file'),int(parser.get('log','log_level')))
 
     # Initializing some startup variables
-	print "Reading conf file...",
 	logger.info("Reading conf file...")	
 	TxRx_rate = float(parser.get('sleep', 'TxRx_rate'))
 	tWin = float(parser.get('sleep', 'twin'))*60.0
 	tdel = float(parser.get('sleep', 'tdel'))*60.0
 	iface = parser.get('sleep', 'iface')
-	print "OK"	
 	logger.info("...OK")
 	
 	# Initialize time vector
@@ -75,12 +73,9 @@ def main(args):
 		# read transceived bytes
 		tx = subprocess.Popen(args_tx, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 		tx_val = int(tx.stdout.readline().strip())
-		tx_win[i] = (tx_val-tx_ref)/1000.0/(tdel)
-					
-		print "rx: ",
-		print rx_win
-		print "tx: ",
-		print tx_win
+		tx_win[i] = (tx_val-tx_ref)/1000.0/(tdel)					
+		
+		# Updating logs
 		logger.debug("IVs - Rx: %f kb/s, Tx = %f kb/s"%(rx_win[i],tx_win[i]))
 
 		# compute the windows' averages
@@ -95,8 +90,7 @@ def main(args):
 		rx_avg = rx_avg / winlen
 		tx_avg = tx_avg / winlen
 
-		print tx_avg
-		print rx_avg
+		# Updatings logs
 		logger.debug("AVGs - Rx: %f kb/s, Tx = %f kb/s"%(rx_avg,tx_avg))
 
 		# Update references
