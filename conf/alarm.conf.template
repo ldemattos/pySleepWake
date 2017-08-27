@@ -26,7 +26,7 @@ blacklist: router.domain.com
 log_level: 20
 
 # Log file
-log_file: /var/log/pySleepWake_sleep.log
+log_file: /var/log/pySleepWake_alarm.log
 
 
 
