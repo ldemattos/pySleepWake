@@ -16,6 +16,12 @@ npackets = 3
 # in minutes
 pdel: 5
 
+# Ignore certains hosts like routers that 
+# keeps constantly trying to check on server
+blacklist: router.domain.com
+
 # Log level
 # info (20) or debug (10)
-log_level: 10
+log_level: 20
+
+

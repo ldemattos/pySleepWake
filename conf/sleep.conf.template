@@ -13,4 +13,4 @@ iface: wlp3s0
 
 # Log level
 # info (20) or debug (10)
-log_level: 10
+log_level: 20

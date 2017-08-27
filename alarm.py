@@ -51,11 +51,13 @@ def main(args):
 	iface = parser.get('main', 'iface')
 	npackets = int(parser.get('main', 'npackets'))
 	pdel = float(parser.get('main', 'pdel'))*60.0
+	blacklist = parser.get('main', 'blacklist').replace(' ','').split(',')
+	print blacklist
 	print "OK"
 	logger.info("...OK")
 	
 	# commands
-	args_tcp = shlex.split('tcpdump -i '+iface+' arp -c '+'1'+' -p'+' host '+ip)
+	args_tcp = shlex.split('tcpdump -i '+iface+' arp -c '+'1'+' -p'+' dst '+ip)
 	cmd_ping = "ping -c1 -w2 " + ip + " > /dev/null 2>&1"
 	cmd_wake = 'etherwake -i '+iface+' '+mac
 	
@@ -69,37 +71,44 @@ def main(args):
 			
 			# acquire the poker
 			if row.find("who-has") != -1:
-				poker = row.split()[6]
+				poker = (row.split()[6])[:-1]
 				print poker			
 			
 			print row.find('packet')
 			if row.find("1 packet captured") != -1:				
-				print "Someone is looking for the server..."
-				logger.debug("%s is looking for the server..."%(poker[0:-1]))
+				print "%s is looking for the server..."%(poker)
+				logger.debug("%s is looking for the server..."%(poker))
+				
+				# check if the poker is blacklisted
+				if not poker in blacklist:
 	
-				# check if the server is online already
-				if system(cmd_ping) != 0:
-					print "It is not online..."
-					logger.debug("It is not online...")
-	
-					# send magic packages if there is enough time delay
-					# from last communication
-					if timeit.default_timer() - pdel0 > 0.:
-						for i in xrange(npackets):
-							print "Waking up the server..."
-							logger.info("Waking up the server...")
-							subprocess.call(cmd_wake,shell=True)
-							
+					# check if the server is online already
+					if system(cmd_ping) != 0:
+						print "It is not online..."
+						logger.debug("It is not online...")
+		
+						# send magic packages if there is enough time delay
+						# from last communication
+						if timeit.default_timer() - pdel0 > 0.:
+							for i in xrange(npackets):
+								print "Waking up the server..."
+								logger.info("Waking up the server...")
+								subprocess.call(cmd_wake,shell=True)
+								
+						else:
+							delay = pdel0 - timeit.default_timer()
+							print "Not enough time to wake it up :/ Waiting for %f s ..."%(delay)
+							logger.debug("Not enough time to wake it up :/ Waiting for %f s ..."%(delay))
+							time.sleep(delay)
+		
 					else:
-						delay = pdel0 - timeit.default_timer()
-						print "Not enough time to wake it up :/ Waiting for %f s ..."%(delay)
-						logger.debug("Not enough time to wake it up :/ Waiting for %f s ..."%(delay))
-						time.sleep(delay)
-	
-				else:
-					pdel0 = timeit.default_timer() + pdel
-					print "It is online... take it easy!"
-					logger.debug("It is online... take it easy!")
+						pdel0 = timeit.default_timer() + pdel
+						print "It is online... take it easy!"
+						logger.debug("It is online... take it easy!")
+						
+				else: 
+					print "%s is blacklisted!"%(poker)
+					logger.debug("%s is blacklisted!"%(poker))
 	
 	return(0)
 

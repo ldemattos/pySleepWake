@@ -53,83 +53,87 @@ def main(args):
 	
 	# Initialize time vector
 	winlen = int(round(tWin/tdel))
-	rx_win = [TxRx_rate*winlen for i in xrange(winlen)]
-	tx_win = [TxRx_rate*winlen for i in xrange(winlen)]
 	
 	# commands
 	args_rx = shlex.split('cat /sys/class/net/'+iface+'/statistics/rx_bytes')
 	args_tx = shlex.split('cat /sys/class/net/'+iface+'/statistics/tx_bytes')
-	cmd_suspend = 'systemctl suspend'
+	cmd_suspend = 'systemctl suspend'	
 	
-	first_loop = 1
-	while True:
-	
-		if first_loop == 1:
-			rx_ref = subprocess.Popen(args_rx, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-			rx_ref = int((rx_ref.stdout.readline()).strip())
-	
-			tx_ref = subprocess.Popen(args_tx, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-			tx_ref = int((tx_ref.stdout.readline()).strip())
-	
-			i = 0
-			first_loop = 0
-	
-		else:
-			# read received bytes
-			rx = subprocess.Popen(args_rx, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-			rx_val = int(rx.stdout.readline().strip())
-			rx_win[i] = (rx_val-rx_ref)/1000.0/(tdel)
-	
-			# read transceived bytes
-			tx = subprocess.Popen(args_tx, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-			tx_val = int(tx.stdout.readline().strip())
-			tx_win[i] = (tx_val-tx_ref)/1000.0/(tdel)
-						
-			print "rx: ",
-			print rx_win
-			print "tx: ",
-			print tx_win
-			logger.debug("IVs - Rx: %f kb/s, Tx = %f kb/s"%(rx_win[i],tx_win[i]))
-	
-			# compute the windows' averages
-			rx_avg = 0.0
-			tx_avg = 0.0
-			j = 0
-			for x in rx_win:
-				rx_avg += x
-				tx_avg += tx_win[j]
-				j+=1
-	
-			rx_avg = rx_avg / winlen
-			tx_avg = tx_avg / winlen
-	
-			print tx_avg
-			print rx_avg
-			logger.debug("AVGs - Rx: %f kb/s, Tx = %f kb/s"%(rx_avg,tx_avg))
-	
-			# Update references
-			rx_ref = rx_val
-			tx_ref = tx_val
-	
-			# Update counter
-			if i < winlen:
-				i+=1
-			else:
-				i=0
-	
-			# Check avegerages
-			if rx_avg < TxRx_rate and tx_avg < TxRx_rate:
-				# Reset variables before suspending
-				fist_loop = 1
-				rx_win = [TxRx_rate*winlen for i in xrange(winlen)]
-				tx_win = [TxRx_rate*winlen for i in xrange(winlen)]
-				logger.info("Going to sleep!")
-				subprocess.call(cmd_suspend,shell=True)
-	
+	# Initials variables
+	rx_ref, tx_ref, rx_win, tx_win = set_refs(args_rx,args_tx,TxRx_rate,winlen)
+	i = 0
+	while True:	
+		
 		# Delay the next measureament
 		time.sleep(tdel)
+		
+		# read received bytes
+		rx = subprocess.Popen(args_rx, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+		rx_val = int(rx.stdout.readline().strip())
+		rx_win[i] = (rx_val-rx_ref)/1000.0/(tdel)
+
+		# read transceived bytes
+		tx = subprocess.Popen(args_tx, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+		tx_val = int(tx.stdout.readline().strip())
+		tx_win[i] = (tx_val-tx_ref)/1000.0/(tdel)
+					
+		print "rx: ",
+		print rx_win
+		print "tx: ",
+		print tx_win
+		logger.debug("IVs - Rx: %f kb/s, Tx = %f kb/s"%(rx_win[i],tx_win[i]))
+
+		# compute the windows' averages
+		rx_avg = 0.0
+		tx_avg = 0.0
+		j = 0
+		for x in rx_win:
+			rx_avg += x
+			tx_avg += tx_win[j]
+			j+=1
+
+		rx_avg = rx_avg / winlen
+		tx_avg = tx_avg / winlen
+
+		print tx_avg
+		print rx_avg
+		logger.debug("AVGs - Rx: %f kb/s, Tx = %f kb/s"%(rx_avg,tx_avg))
+
+		# Update references
+		rx_ref = rx_val
+		tx_ref = tx_val
+
+		# Update counter
+		if i < winlen-1:
+			i+=1
+		else:
+			i=0
+
+		# Check avegerages
+		if rx_avg < TxRx_rate and tx_avg < TxRx_rate:
+			
+			logger.info("Going to sleep!")
+			subprocess.call(cmd_suspend,shell=True)
+			
+			# Reset variables before suspending
+			i = 0
+			rx_ref, tx_ref, rx_win, tx_win = set_refs(args_rx,args_tx,TxRx_rate,winlen)		
 	
 	return(0)
+
+# Set initial conditions
+def set_refs(args_rx,args_tx,TxRx_rate,winlen):
+	
+	rx_ref = subprocess.Popen(args_rx, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+	rx_ref = int((rx_ref.stdout.readline()).strip())
+
+	tx_ref = subprocess.Popen(args_tx, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+	tx_ref = int((tx_ref.stdout.readline()).strip())
+	
+	rx_win = [TxRx_rate*winlen for j in xrange(winlen)]
+	tx_win = [TxRx_rate*winlen for j in xrange(winlen)]
+	
+	return(rx_ref,tx_ref,rx_win,tx_win)
 
 if __name__ == '__main__':
 	import sys
