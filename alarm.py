@@ -25,78 +25,80 @@ import subprocess
 import timeit
 import time
 from os import system
+from os.path import dirname
+from os.path import realpath
 import sys
-sys.path.insert(0, './src')
+sys.path.insert(0, dirname(realpath(sys.argv[0]))+'/src')
 import log
 
 def main(args):
-	
+
 	# Input arguments
 	parser = argparse.ArgumentParser(description='pySleepWake alarm',prog='alarm.py')
-	parser.add_argument("conf",help="configuration file")   
+	parser.add_argument("conf",help="configuration file")
 	args,unknown = parser.parse_known_args()
-	
+
 	# Read conf file
 	parser = SafeConfigParser()
-	parser.read(args.conf)	
-	
+	parser.read(args.conf)
+
 	# Setup log
 	logger = log.setup(parser.get('log','log_file'),int(parser.get('log','log_level')))
 
-	# Read alarm conf file	
+	# Read alarm conf file
 	logger.info("Reading conf file...")
 	ip = parser.get('main', 'ip')
 	mac = parser.get('main', 'mac')
 	iface = parser.get('main', 'iface')
 	npackets = int(parser.get('main', 'npackets'))
 	pdel = float(parser.get('main', 'pdel'))*60.0
-	blacklist = parser.get('main', 'blacklist').replace(' ','').split(',')	
+	blacklist = parser.get('main', 'blacklist').replace(' ','').split(',')
 	logger.info("...OK")
-	
+
 	# commands
 	args_tcp = shlex.split('tcpdump -i '+iface+' arp -c '+'1'+' -p'+' dst '+ip)
 	cmd_ping = "ping -c1 -w2 " + ip + " > /dev/null 2>&1"
 	cmd_wake = 'etherwake -i '+iface+' '+mac
-	
+
 	# Wait for someone calls the server in the network
 	pdel0 = timeit.default_timer() + pdel
 	while True:
 		tcpdump = subprocess.Popen(args_tcp, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-		for row in iter(tcpdump.stdout.readline, b''):			
-			
+		for row in iter(tcpdump.stdout.readline, b''):
+
 			# acquire the poker
 			if row.find("who-has") != -1:
-				poker = (row.split()[6])[:-1]							
-			
-			if row.find("1 packet captured") != -1:								
+				poker = (row.split()[6])[:-1]
+
+			if row.find("1 packet captured") != -1:
 				logger.debug("%s is looking for the server..."%(poker))
-				
+
 				# check if the poker is blacklisted
 				if not poker in blacklist:
-	
+
 					# check if the server is online already
-					if system(cmd_ping) != 0:						
+					if system(cmd_ping) != 0:
 						logger.debug("It is not online...")
-		
+
 						# send magic packages if there is enough time delay
 						# from last communication
 						if timeit.default_timer() - pdel0 > 0.:
-							for i in xrange(npackets):								
+							for i in xrange(npackets):
 								logger.info("Waking up the server... Requested by %s"%(poker))
 								subprocess.call(cmd_wake,shell=True)
-								
+
 						else:
 							delay = pdel0 - timeit.default_timer()
 							logger.debug("Not enough time to wake it up :/ Waiting for %f s ..."%(delay))
 							time.sleep(delay)
-		
+
 					else:
-						pdel0 = timeit.default_timer() + pdel						
+						pdel0 = timeit.default_timer() + pdel
 						logger.debug("It is online... take it easy!")
-						
-				else: 					
+
+				else:
 					logger.debug("%s is blacklisted!"%(poker))
-	
+
 	return(0)
 
 if __name__ == '__main__':

@@ -23,48 +23,50 @@ from ConfigParser import SafeConfigParser
 import shlex
 import subprocess
 import time
+from os.path import dirname
+from os.path import realpath
 import sys
-sys.path.insert(0, './src')
+sys.path.insert(0, dirname(realpath(sys.argv[0]))+'/src')
 import log
 
 def main(args):
-	
+
 	# Input arguments
 	parser = argparse.ArgumentParser(description='pySleepWake sleeper',prog='sleep.py')
-	parser.add_argument("conf",help="configuration file")    
-	args,unknown = parser.parse_known_args()	
-	
+	parser.add_argument("conf",help="configuration file")
+	args,unknown = parser.parse_known_args()
+
 	# Read conf file
 	parser = SafeConfigParser()
 	parser.read(args.conf)
-	
+
 	# Setup log
 	logger = log.setup(parser.get('log','log_file'),int(parser.get('log','log_level')))
 
     # Initializing some startup variables
-	logger.info("Reading conf file...")	
+	logger.info("Reading conf file...")
 	TxRx_rate = float(parser.get('sleep', 'TxRx_rate'))
 	tWin = float(parser.get('sleep', 'twin'))*60.0
 	tdel = float(parser.get('sleep', 'tdel'))*60.0
 	iface = parser.get('sleep', 'iface')
 	logger.info("...OK")
-	
+
 	# Initialize time vector
 	winlen = int(round(tWin/tdel))
-	
+
 	# commands
 	args_rx = shlex.split('cat /sys/class/net/'+iface+'/statistics/rx_bytes')
 	args_tx = shlex.split('cat /sys/class/net/'+iface+'/statistics/tx_bytes')
-	cmd_suspend = 'systemctl suspend'	
-	
+	cmd_suspend = 'systemctl suspend'
+
 	# Initials variables
 	rx_ref, tx_ref, rx_win, tx_win = set_refs(args_rx,args_tx,TxRx_rate,winlen)
 	i = 0
-	while True:	
-		
+	while True:
+
 		# Delay the next measureament
 		time.sleep(tdel)
-		
+
 		# read received bytes
 		rx = subprocess.Popen(args_rx, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 		rx_val = int(rx.stdout.readline().strip())
@@ -73,8 +75,8 @@ def main(args):
 		# read transceived bytes
 		tx = subprocess.Popen(args_tx, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 		tx_val = int(tx.stdout.readline().strip())
-		tx_win[i] = (tx_val-tx_ref)/1000.0/(tdel)					
-		
+		tx_win[i] = (tx_val-tx_ref)/1000.0/(tdel)
+
 		# Updating logs
 		logger.debug("IVs - Rx: %f kb/s, Tx = %f kb/s"%(rx_win[i],tx_win[i]))
 
@@ -104,30 +106,30 @@ def main(args):
 			i=0
 
 		# Check avegerages
-		if rx_avg < TxRx_rate and tx_avg < TxRx_rate:			
-			
-			# Reset variables before suspending			
+		if rx_avg < TxRx_rate and tx_avg < TxRx_rate:
+
+			# Reset variables before suspending
 			i = 0
-			rx_ref, tx_ref, rx_win, tx_win = set_refs(args_rx,args_tx,TxRx_rate,winlen)		
-			
+			rx_ref, tx_ref, rx_win, tx_win = set_refs(args_rx,args_tx,TxRx_rate,winlen)
+
 			logger.info("Going to sleep!")
 			subprocess.call(cmd_suspend,shell=True)
 			time.sleep(3.0)
-	
+
 	return(0)
 
 # Set initial conditions
 def set_refs(args_rx,args_tx,TxRx_rate,winlen):
-	
+
 	rx_ref = subprocess.Popen(args_rx, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 	rx_ref = int((rx_ref.stdout.readline()).strip())
 
 	tx_ref = subprocess.Popen(args_tx, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 	tx_ref = int((tx_ref.stdout.readline()).strip())
-	
+
 	rx_win = [TxRx_rate*winlen for j in xrange(winlen)]
 	tx_win = [TxRx_rate*winlen for j in xrange(winlen)]
-	
+
 	return(rx_ref,tx_ref,rx_win,tx_win)
 
 if __name__ == '__main__':

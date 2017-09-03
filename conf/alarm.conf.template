@@ -9,14 +9,14 @@ mac: XX:XX:XX:XX:XX:XX
 iface: eth0
 
 # number of magic packets to send
-npackets = 3
+npackets: 3
 
 # time delay after the last sucessfully ping
 # in order to let the first arp packages after shudown turn
 # in minutes
 pdel: 5
 
-# Ignore certains hosts like routers that 
+# Ignore certains hosts like routers that
 # keeps constantly trying to check on server
 blacklist: router.domain.com
 
@@ -27,7 +27,3 @@ log_level: 20
 
 # Log file
 log_file: /var/log/pySleepWake_alarm.log
-
-
-
-

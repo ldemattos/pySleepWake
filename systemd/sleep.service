@@ -1,0 +1,13 @@
+[Unit]
+Description=Sleep
+After=network.target
+
+[Service]
+User=root
+#Environment=STNORESTART=yes GOCG=25
+ExecStart=/opt/pySleepWake/sleep.py /opt/pySleepWake/sleep.conf
+Restart=on-success
+SuccessExitStatus=3
+
+[Install]
+WantedBy=multi-user.target
