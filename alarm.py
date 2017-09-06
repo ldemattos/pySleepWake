@@ -70,34 +70,24 @@ def main(args):
 			if row.find("who-has") != -1:
 				poker = (row.split()[6])[:-1]
 				logger.debug("%s is looking for the server..."%(poker))
-
-				# check if the poker is blacklisted
-				if not poker in blacklist:
-
-					# check if the server is online already
-					if system(cmd_ping) != 0:
-						logger.debug("It is not online...")
-
-						# send magic packages if there is enough time delay
-						# from last communication
-						if timeit.default_timer() - pdel0 > 0.:
-							for i in xrange(npackets):
-								logger.info("Waking up the server... Requested by %s"%(poker))
-								subprocess.call(cmd_wake,shell=True)
+				
+				# check logic conditions
+				blist = not poker in blacklist
+				ping = (system(cmd_ping) != 0)
+				deltat = timeit.default_timer() - pdel0
+				
+				# Check for all conditions
+				if all([blist, ping, deltat > 0.0]):				
+					for i in xrange(npackets):
+						logger.info("Waking up the server... Requested by %s"%(poker))
+						subprocess.call(cmd_wake,shell=True)
 							
-							pdel0 = timeit.default_timer() + pdel								
-
-						else:
-							delay = pdel0 - timeit.default_timer()
-							logger.debug("Not enough time to wake it up :/ Waiting for %f s ..."%(delay))
-							time.sleep(delay)
-
-					else:
-						pdel0 = timeit.default_timer() + pdel
-						logger.debug("It is online... take it easy!")
-
-				else:
-					logger.debug("%s is blacklisted!"%(poker))
+					pdel0 = timeit.default_timer() + pdel						
+						
+				else:		
+					logger.debug("One or more wakeup conditions weren't met: blist=%s,ping=%s,Dt=%f"%(blist,ping,deltat))
+					if deltat > 0.:
+						time.sleep(delay)			
 
 	return(0)
 
