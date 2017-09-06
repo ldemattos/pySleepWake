@@ -84,6 +84,8 @@ def main(args):
 							for i in xrange(npackets):
 								logger.info("Waking up the server... Requested by %s"%(poker))
 								subprocess.call(cmd_wake,shell=True)
+							
+							pdel0 = timeit.default_timer() + pdel								
 
 						else:
 							delay = pdel0 - timeit.default_timer()
