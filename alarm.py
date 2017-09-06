@@ -69,8 +69,6 @@ def main(args):
 			# acquire the poker
 			if row.find("who-has") != -1:
 				poker = (row.split()[6])[:-1]
-
-			if row.find("1 packet captured") != -1:
 				logger.debug("%s is looking for the server..."%(poker))
 
 				# check if the poker is blacklisted
