@@ -72,12 +72,12 @@ def main(args):
 				logger.debug("%s is looking for the server..."%(poker))
 				
 				# check logic conditions
-				blist = not poker in blacklist
-				ping = (system(cmd_ping) != 0)
+				blist = poker in blacklist
+				ping = system(cmd_ping) == 0
 				deltat = timeit.default_timer() - pdel0
 				
 				# Check for all conditions
-				if all([blist, ping, deltat > 0.0]):				
+				if all([not blist, not ping, deltat > 0.]):				
 					for i in xrange(npackets):
 						logger.info("Waking up the server... Requested by %s"%(poker))
 						subprocess.call(cmd_wake,shell=True)
