@@ -85,7 +85,7 @@ def main(args):
 					pdel0 = timeit.default_timer() + pdel						
 						
 				else:		
-					logger.debug("One or more wakeup conditions weren't met: blist=%s,ping=%s,Dt=%f"%(blist,ping,deltat))
+					logger.debug("One or more wakeup conditions weren't met: blist=%s,ping=%s,Dt=%.2f"%(blist,ping,deltat))
 					if ping == True:						
 						time.sleep(pdel)
 
