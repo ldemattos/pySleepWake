@@ -28,6 +28,7 @@ from os.path import realpath
 import sys
 sys.path.insert(0, dirname(realpath(sys.argv[0]))+'/src')
 import log
+from os import getloadavg
 
 def main(args):
 
@@ -48,6 +49,7 @@ def main(args):
 	TxRx_rate = float(parser.get('sleep', 'TxRx_rate'))
 	tWin = float(parser.get('sleep', 'twin'))*60.0
 	tdel = float(parser.get('sleep', 'tdel'))*60.0
+	lavg = float(parser.get('sleep', 'lavg'))
 	iface = parser.get('sleep', 'iface')
 	logger.info("...OK")
 
@@ -93,7 +95,8 @@ def main(args):
 		tx_avg = tx_avg / winlen
 
 		# Updatings logs
-		logger.debug("AVGs - Rx: %f kb/s, Tx = %f kb/s"%(rx_avg,tx_avg))
+		load = getloadavg()[0]
+		logger.debug("AVGs - Rx: %f kb/s, Tx = %f kb/s, load: %f"%(rx_avg,tx_avg,load))
 
 		# Update references
 		rx_ref = rx_val
@@ -105,8 +108,8 @@ def main(args):
 		else:
 			i=0
 
-		# Check avegerages
-		if rx_avg < TxRx_rate and tx_avg < TxRx_rate:
+		# Check averages
+		if all([rx_avg < TxRx_rate, tx_avg < TxRx_rate, load < lavg]):
 
 			# Reset variables before suspending
 			i = 0

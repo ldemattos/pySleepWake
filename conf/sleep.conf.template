@@ -8,6 +8,10 @@ twin: 20.0
 # Time delay between measurements, in minutes
 tdel: 1.0
 
+# Maximum load average that permits the computer to go sleep
+# 5 minuts average
+lavg: 1.0
+
 # Reference interface
 iface: wlp3s0
 
